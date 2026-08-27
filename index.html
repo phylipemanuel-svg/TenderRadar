@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Flotek Tender Radar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Key colours */
+    --violet:#4b1c4b;      /* Russian Violet, darkest — key */
+    --plum:#8a3b8e;        /* Plum, mid — key */
+    --orange:#ee792c;      /* Princeton Orange, mid — key */
+    --green:#99bfaa;       /* Meadow Green, mid — key */
+    /* Russian Violet tints */
+    --violet-lightest:#f6f4f6; --violet-lighter:#ede8ed; --violet-light:#b7a4b7;
+    --violet-mid:#947793; --violet-darker:#704a70;
+    /* Plum tints */
+    --plum-lightest:#f5edf8; --plum-lighter:#c4aacf; --plum-light:#ac83bb;
+    /* Princeton Orange tints */
+    --orange-lightest:#fdf0e0; --orange-dark:#bd6025;
+    /* Meadow Green tints */
+    --green-lightest:#e0f0e6; --green-dark:#648b78;
+    /* Roles */
+    --paper:var(--violet-lightest); --card:#FFFFFF;
+    --rule:var(--violet-lighter); --rule-soft:var(--violet-lightest);
+    --ink:var(--violet); --muted:var(--violet-darker); --muted-soft:var(--violet-mid);
+    --font:'Space Grotesk','Segoe UI',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--font);font-weight:400;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--plum)}
+  button{font-family:var(--font)}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px}
+
+  .masthead{background:var(--violet);color:#fff;padding:34px 0 30px}
+  .masthead .logo{width:168px;display:block;color:#fff;margin-bottom:8px}
+  .masthead h1{font-size:20px;font-weight:700;letter-spacing:-.02em;margin:26px 0 0}
+  .masthead p{font-size:13px;color:var(--plum-lighter);margin:6px 0 0}
+  .dot{color:var(--orange)}
+
+  .panel{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:16px;margin:20px 0}
+  .eyebrow{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-soft);font-weight:500}
+  h2.sec{font-size:15px;font-weight:700;color:var(--violet);margin:0 0 12px;letter-spacing:-.01em}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{padding:8px 12px;font-size:12px;font-weight:500;border-radius:5px;border:1px solid var(--rule);background:#fff;color:var(--muted);cursor:pointer}
+  .chip[aria-pressed="true"]{background:var(--violet);border-color:var(--violet);color:#fff}
+  .chip.small[aria-pressed="true"]{background:var(--rule-soft);border-color:var(--plum);color:var(--violet)}
+  .chip:disabled{opacity:.55;cursor:not-allowed}
+
+  .btn{padding:9px 16px;font-size:13px;font-weight:600;border-radius:5px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary{background:var(--orange);color:#fff}
+  .btn-violet{background:var(--violet);color:#fff}
+  .btn-ghost{background:#fff;color:var(--violet);border:1px solid var(--rule)}
+  .btn-outline{background:#fff;color:var(--orange);border:1px solid var(--orange)}
+  .btn:disabled{background:var(--muted-soft);color:#fff;cursor:not-allowed;border-color:var(--muted-soft)}
+
+  input[type=password],input[type=text]{width:100%;padding:9px 11px;font-size:13px;font-family:var(--font);border:1px solid var(--rule);border-radius:5px;background:#fff;color:var(--ink)}
+  label.fld{display:block;margin-bottom:12px}
+  label.fld span{display:block;margin-bottom:5px}
+
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .meter{display:flex;align-items:center;gap:12px;margin-top:8px}
+  .meter .name{flex:0 0 190px;font-size:12px;color:var(--muted)}
+  .meter .track{flex:1;height:4px;background:var(--rule-soft);border-radius:2px;overflow:hidden}
+  .meter .fill{height:100%;background:var(--plum);transition:width .4s ease}
+  .meter .fill.done{background:var(--green-dark)}
+  .meter .fill.failed{background:var(--muted-soft)}
+  .meter .stat{flex:0 0 76px;font-size:11px;color:var(--muted);text-align:right}
+
+  .card{background:var(--card);border:1px solid var(--rule);border-radius:6px;margin-bottom:12px}
+  .card-body{display:flex;gap:16px;padding:16px}
+  .spine{width:4px;border-radius:2px;background:var(--rule-soft);align-self:stretch;min-height:60px;display:flex;flex-direction:column;justify-content:flex-end}
+  .spine i{display:block;border-radius:2px}
+  .tag{display:inline-block;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;border:1px solid transparent}
+  .t-critical{background:var(--orange);color:#fff}
+  .t-high{background:var(--plum);color:#fff}
+  .t-medium{background:var(--violet);color:#fff}
+  .t-qualify{background:#fff;color:var(--violet);border-color:var(--plum)}
+  .t-watch{background:var(--rule-soft);color:var(--muted)}
+  .t-new{background:var(--orange);color:#fff}
+  .t-updated{background:var(--plum);color:#fff}
+  .t-unchanged{background:var(--green-lightest);color:var(--green-dark)}
+
+  .title{font-size:15px;font-weight:500;line-height:1.3}
+  .buyer{font-size:13px;color:var(--plum);margin-top:2px}
+  .summary{font-size:13px;color:var(--muted)}
+  .grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  .fld-label{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-soft);font-weight:500;display:block;margin-bottom:3px}
+  .fld-value{font-size:13px}
+  .fld-value.unknown{color:var(--muted-soft);font-style:italic}
+  .linkrow{font-size:12px;color:var(--muted-soft);display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+  .disclose{background:none;border:none;padding:0;color:var(--orange);font-size:12px;font-weight:600;cursor:pointer;align-self:flex-start}
+  .dossier{border-top:1px solid var(--rule-soft);padding:16px}
+  .qual{display:flex;gap:12px;margin-bottom:8px;font-size:13px}
+  .qual .st{flex:0 0 70px;font-size:9px;font-weight:700;letter-spacing:.06em;padding-top:2px}
+  .s-confirmed{color:var(--violet)} .s-likely{color:var(--plum)}
+  .s-inferred{color:var(--orange)} .s-unknown{color:var(--muted-soft)}
+  .rec{background:var(--violet);color:#fff;border-radius:6px;padding:16px;margin-top:16px}
+  .rec .big{font-size:20px;font-weight:700;letter-spacing:-.01em;margin-top:4px}
+  .rec p{font-size:13px;color:var(--plum-lightest);margin:8px 0 0}
+
+  .note{border:1px solid var(--orange);background:#fff;border-radius:6px;padding:14px;font-size:13px;margin:20px 0}
+  .note.plum{border-color:var(--plum)}
+  .empty{border:1px dashed var(--rule);background:var(--card);border-radius:6px;padding:36px 20px;text-align:center}
+
+  /* Report */
+  .rpt{background:#fff}
+  .rpt-page{padding:44px 40px;border-top:1px solid var(--rule-soft)}
+  .rpt-cover{background:var(--violet);color:#fff;border-top:none}
+  .rpt-cover .logo{width:196px;color:#fff;display:block;margin-bottom:14px}
+  .rpt-cover h2{font-size:40px;font-weight:700;line-height:1.1;letter-spacing:-.03em;margin:28px 0 12px}
+  .rpt-cover p{font-size:14px;color:var(--plum-lighter);max-width:520px}
+  .stat{border-top:2px solid var(--orange);padding-top:10px}
+  .stat b{display:block;font-size:30px;font-weight:700}
+  .stat span{font-size:12px;color:var(--plum-lighter)}
+  .meta b{display:block;color:var(--orange);font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+  .glance{display:flex;gap:16px;padding-bottom:16px;border-bottom:1px solid var(--rule-soft);margin-bottom:16px}
+  .glance .num{font-size:26px;font-weight:700;color:var(--rule-soft);line-height:1;flex:0 0 34px}
+  .toolbar{background:var(--paper);border-bottom:1px solid var(--rule);padding:12px 20px;display:flex;gap:12px;flex-wrap:wrap}
+  .footline{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:10px;color:var(--muted-soft);margin-top:20px}
+
+  .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  @media (prefers-reduced-motion:reduce){.spin{animation:none}.meter .fill{transition:none}}
+
+  @media (max-width:640px){
+    .grid2,.grid4,.grid3{grid-template-columns:1fr}
+    .meter .name{flex:0 0 120px}
+    .rpt-page{padding:28px 20px}
+    .rpt-cover h2{font-size:30px}
+  }
+  @media print{
+    .noprint{display:none!important}
+    body{background:#fff}
+    .rpt-page{page-break-after:always;border-top:none}
+    @page{margin:14mm}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ==================================================================
+   Flotek Tender Radar — single file, no dependencies, no build step.
+   Your Anthropic API key is stored in this browser only. It is never
+   sent anywhere except api.anthropic.com, and never committed to the
+   repository.
+================================================================== */
+
+const LOGO = '<svg class="logo" viewBox="0 0 980.75 212.71" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flotek"><path fill="#8a3b8e" d="M 134.23 195.43 L 134.23 73.89 C 134.23 63.6 123.09 57.16 114.17 62.31 L 8.91 123.08 C 0 128.23 0 141.1 8.91 146.25 L 114.17 207.02 C 123.09 212.16 134.23 205.73 134.23 195.43"/><path fill="#5cba9e" d="M 167.23 138.27 L 167.23 16.73 C 167.23 6.43 156.09 0 147.17 5.15 L 41.92 65.92 C 33 71.07 33 83.94 41.92 89.09 L 147.18 149.86 C 156.09 155 167.23 148.57 167.23 138.27"/><path fill="#4b1c4b" d="M 114.17 62.31 L 54.86 96.55 L 134.23 142.38 L 134.23 73.89 C 134.23 63.59 123.09 57.16 114.17 62.31"/><g fill="currentColor"><path d="M 235.77 208.83 L 235.77 3.23 L 356.74 3.23 L 356.74 33.47 L 269.34 33.47 L 269.34 96.18 L 349.81 96.18 L 349.81 126.7 L 269.34 126.7 L 269.34 208.83 Z M 235.77 208.83"/><path d="M 374.22 3.23 L 406.13 3.23 L 406.13 208.83 L 374.22 208.83 Z M 374.22 3.23"/><path d="M 500.46 212.71 C 486.77 212.71 474.52 209.89 463.7 204.25 C 452.88 198.61 444.37 190.56 438.17 180.11 C 431.97 169.66 428.88 157.13 428.88 142.51 L 428.88 138.07 C 428.88 123.46 431.97 110.88 438.17 100.34 C 444.37 89.8 452.88 81.75 463.7 76.2 C 474.52 70.65 486.77 67.88 500.46 67.88 C 514.15 67.88 526.36 70.65 537.09 76.2 C 547.81 81.75 556.28 89.8 562.48 100.34 C 568.67 110.88 571.77 123.46 571.77 138.07 L 571.77 142.51 C 571.77 157.13 568.67 169.66 562.48 180.11 C 556.28 190.56 547.81 198.61 537.09 204.25 C 526.36 209.89 514.15 212.71 500.46 212.71 M 500.46 184.41 C 512.12 184.41 521.64 180.66 529.04 173.17 C 536.44 165.68 540.14 155.19 540.14 141.68 L 540.14 138.91 C 540.14 125.41 536.44 114.91 529.04 107.41 C 521.64 99.92 512.12 96.18 500.46 96.18 C 488.81 96.18 479.28 99.92 471.89 107.41 C 464.48 114.91 460.79 125.41 460.79 138.91 L 460.79 141.68 C 460.79 155.19 464.48 165.68 471.89 173.17 C 479.28 180.66 488.81 184.41 500.46 184.41"/><path d="M 641.97 208.83 C 633.09 208.83 626.01 206.19 620.74 200.92 C 615.47 195.65 612.84 188.48 612.84 179.41 L 612.84 98.12 L 577.04 98.12 L 577.04 71.76 L 612.84 71.76 L 612.84 3.23 L 644.74 3.23 L 644.74 71.76 L 684.14 71.76 L 684.14 98.12 L 644.74 98.12 L 644.74 174.14 C 644.74 179.69 647.33 182.47 652.51 182.47 L 679.98 182.47 L 679.98 208.83 Z M 641.97 208.83"/><path d="M 763.22 212.71 C 749.53 212.71 737.46 209.8 727.01 203.97 C 716.56 198.14 708.42 189.92 702.59 179.28 C 696.77 168.64 693.85 156.2 693.85 141.96 L 693.85 138.63 C 693.85 124.2 696.72 111.71 702.45 101.17 C 708.18 90.62 716.23 82.44 726.59 76.62 C 736.95 70.79 748.88 67.88 762.39 67.88 C 775.71 67.88 787.36 70.79 797.35 76.62 C 807.34 82.44 815.11 90.62 820.65 101.17 C 826.2 111.71 828.98 124.02 828.98 138.07 L 828.98 149.45 L 726.04 149.45 C 726.41 160.18 730.2 168.78 737.41 175.25 C 744.63 181.73 753.51 184.96 764.05 184.96 C 774.41 184.96 782.09 182.7 787.08 178.17 C 792.07 173.64 795.86 168.5 798.46 162.77 L 824.82 176.36 C 822.22 181.36 818.48 186.68 813.58 192.32 C 808.68 197.96 802.15 202.77 794.02 206.75 C 785.88 210.72 775.61 212.71 763.22 212.71 M 726.32 125.31 L 796.52 125.31 C 795.77 116.25 792.3 109.04 786.11 103.67 C 779.91 98.3 771.91 95.62 762.11 95.62 C 751.93 95.62 743.8 98.3 737.69 103.67 C 731.59 109.04 727.79 116.25 726.32 125.31"/><path d="M 850.62 208.83 L 850.62 3.23 L 882.53 3.23 L 882.53 123.64 L 887.24 123.64 L 936.63 71.76 L 978.53 71.76 L 912.21 138.07 L 980.75 208.83 L 939.41 208.83 L 887.24 153.06 L 882.53 153.06 L 882.53 208.83 Z M 850.62 208.83"/></g></svg>';
+
+const MODEL = "claude-sonnet-4-6";
+const UNKNOWN = "Not confirmed in the public notice — check tender pack.";
+
+const K = {
+  key: "flotek-tender:key",
+  fckey: "flotek-tender:firecrawl",
+  run: "flotek-tender:last-run",
+  sched: "flotek-tender:schedule",
+  dossier: id => "flotek-tender:dossier:" + id,
+};
+
+/* ---------- Sweeps ---------- */
+const SWEEPS = [
+  { id:"voice", label:"Telephony & unified comms",
+    terms:"hosted telephony, cloud telephony, VoIP, SIP trunk, unified communications, UCaaS, Microsoft Teams Phone, Operator Connect, direct routing, Cisco Webex Calling, PSTN replacement, analogue line replacement, WLR withdrawal, digital telephony, contact centre, CCaaS" },
+  { id:"managedit", label:"Managed IT & service desk",
+    terms:"managed IT services, ICT managed service, IT support contract, outsourced IT, service desk, helpdesk, end user computing, IT managed service provider, technology transformation" },
+  { id:"network", label:"Network infrastructure & Wi-Fi",
+    terms:"network infrastructure, LAN refresh, network refresh, switching, routing, Wi-Fi, wireless LAN, WLAN, managed network, campus network, wireless infrastructure" },
+  { id:"cabling", label:"Structured cabling & fibre",
+    terms:"structured cabling, data cabling, Cat6, Cat6A, fibre optic cabling, fibre installation, network cabling, passive network, ICT cabling, comms room, data centre containment" },
+  { id:"connectivity", label:"Connectivity & WAN",
+    terms:"business connectivity, leased line, Ethernet circuit, FTTP, SOGEA, broadband, WAN, SD-WAN, 4G backup, 5G connectivity, internet services, wide area network" },
+  { id:"cyber", label:"Cyber & managed security",
+    terms:"cyber security services, managed security, SOC, SIEM, firewall, penetration testing, IT health check, CHECK, CREST, zero trust, SASE, security operations" },
+  { id:"microsoft", label:"Microsoft 365, Azure & cloud",
+    terms:"Microsoft 365, M365, Office 365, Azure, Microsoft cloud, cloud migration, Dynamics 365, Power Platform, cloud hosting, application hosting, cloud transformation" },
+  { id:"physical", label:"CCTV, access control & AV",
+    terms:"IP CCTV, CCTV installation, access control, door entry, digital signage, audio visual, AV installation, technology-led security systems" },
+  { id:"frameworks", label:"Frameworks, DPS & dynamic markets", frameworkMode:true,
+    terms:"framework agreement, dynamic purchasing system, DPS, dynamic market, open framework, supplier framework application, framework reopening, lot appointment" },
+  { id:"pipeline", label:"Pipeline, PINs & market engagement", pipelineMode:true,
+    terms:"prior information notice, preliminary market engagement, procurement pipeline, supplier engagement event, forward plan, upcoming procurement, soft market testing" },
+];
+
+const CADENCES = [
+  { k:"weekly", l:"Weekly", days:7 },
+  { k:"fortnightly", l:"Fortnightly", days:14 },
+  { k:"monthly", l:"Monthly", days:30 },
+  { k:"off", l:"No reminder", days:null },
+];
+
+const PRIORITY_ORDER = { "CRITICAL":0,"HIGH":1,"MEDIUM":2,"QUALIFY / PARTNER":3,"QUALIFY":3,"PARTNER":3,"WATCH":4,"PASS":5 };
+const PRIORITY_CLASS = { "CRITICAL":"t-critical","HIGH":"t-high","MEDIUM":"t-medium","QUALIFY / PARTNER":"t-qualify","QUALIFY":"t-qualify","PARTNER":"t-qualify","WATCH":"t-watch","PASS":"t-watch" };
+const CHANGE_CLASS = { "NEW":"t-new","UPDATED":"t-updated","UNCHANGED":"t-unchanged" };
+const STATUS_CLASS = { "CONFIRMED":"s-confirmed","LIKELY":"s-likely","INFERRED":"s-inferred","UNKNOWN":"s-unknown" };
+
+/* ---------- Prompt scaffolding ---------- */
+const PROFILE = `Flotek Group is a UK technology and communications group. Services: managed IT and service desk; Microsoft 365, Azure, Teams, Teams Phone, Operator Connect; Cisco Webex Calling; hosted telephony, UCaaS, SIP and voice; PSTN replacement; contact centre; business connectivity (leased lines, FTTP, SOGEA, broadband, SD-WAN, 4G/5G backup); cyber and managed security (firewalls, SOC, pen testing); network infrastructure (LAN, WAN, Wi-Fi, switching, routing); structured data cabling (Cat6/Cat6A, fibre installation and termination, comms rooms, data centres); CCTV, door access, AV and digital signage; cloud and application hosting; hardware deployment; professional services.
+
+Flotek delivers UK-wide. Target sectors: NHS and health boards, local authorities, central and Welsh Government, housing associations, education (schools, colleges, universities), police, fire and rescue, blue light, charities, large multi-site organisations.`;
+
+const SOURCES = `Search publicly accessible UK procurement sources. Prefer the original contracting authority or the official portal over tender aggregation sites. Cover at minimum: Find a Tender Service, Contracts Finder, Sell2Wales, Public Contracts Scotland, eTendersNI, Crown Commercial Service, ProContract, In-Tend, Delta eSourcing, Jaggaer, Atamis, Due North, The Chest, YORtender, ESPO, YPO, NEPO, SUPC, NHS Shared Business Services, NOE CPC, BlueLight Commercial, and buyer procurement pages indexed by search engines.`;
+
+const EVIDENCE = `Evidence discipline is absolute. Never invent a notice, reference number, URL, deadline or value. If you cannot confirm a field from what you actually read, set it to null — do not guess. Only include an opportunity if you have seen a real notice or buyer page for it. If a search returns nothing genuinely relevant, return an empty array. An empty result is a correct result.`;
+
+function sweepPrompt(sweep, region, today){
+  const geo = region === "wales"
+    ? "Geographic priority order: 1) Wales, 2) South West England, 3) Midlands, 4) North West England, 5) UK-wide. Do not exclude worthwhile UK opportunities purely because they sit outside Wales."
+    : "Search UK-wide with no regional weighting, but note the delivery location for each opportunity.";
+
+  const remit = sweep.pipelineMode
+    ? "Find EARLY-WARNING items only: prior information notices, preliminary market engagement, procurement pipelines and forward plans, framework renewals, DPS creation, supplier engagement events. These are not yet biddable. Focus on telecoms transformation, PSTN replacement, network refresh, Microsoft and cloud migration, and cyber programmes."
+    : sweep.frameworkMode
+      ? "Find frameworks, DPS and dynamic markets that are CURRENTLY OPEN to new supplier applications, or that have a stated reopening window. State clearly whether Flotek can apply now."
+      : "Find LIVE tender opportunities open for response as at " + today + ".";
+
+  const liveness = sweep.pipelineMode
+    ? '"liveness" must be "PIPELINE".'
+    : '"liveness" must be "LIVE" (open for response now) or "PIPELINE" (not yet biddable). Exclude anything already closed.';
+
+  return `You are Flotek Group's tender intelligence analyst. Today is ${today}.
+
+${PROFILE}
+
+TASK — sweep: ${sweep.label}
+${remit}
+
+Search terms to combine and vary, including procurement-language synonyms:
+${sweep.terms}
+
+${geo}
+
+${SOURCES}
+
+Run several distinct searches before answering. Check publication date, deadline, value, lot structure, geography and whether Flotek could actually apply (framework membership, mandatory accreditation, turnover).
+
+${EVIDENCE}
+
+Return ONLY a JSON object, no preamble, no markdown fences:
+{"opportunities":[{"title":string,"buyer":string,"source":string,"url":string,"ref":string|null,"published":string|null,"deadline":string|null,"clarificationDeadline":string|null,"value":string|null,"valueBasis":string|null,"duration":string|null,"procurementType":string|null,"vehicle":string|null,"lots":string|null,"location":string|null,"score":number,"priority":string,"confidence":string,"liveness":string,"summary":string}]}
+
+Rules:
+- "summary": one sentence, max 25 words, plain English, what the buyer is actually buying.
+- "vehicle": "Framework", "DPS / Dynamic Market" or "Standalone contract".
+- "score": 0-100. 90+ exceptional fit; 80-89 excellent; 70-79 strong; 60-69 potential; 40-59 lower fit or partner-dependent. Do not return anything scoring below 40.
+- "priority": one of CRITICAL (deadline within ~7 days), HIGH, MEDIUM, QUALIFY / PARTNER, WATCH.
+- "confidence": HIGH, MEDIUM or LOW — how sure you are the notice details are accurate.
+- ${liveness}
+- Dates as ISO YYYY-MM-DD where known.
+- Maximum 6 opportunities. Quality over quantity — five real ones beat fifty weak ones.
+- Do not include an opportunity just because its title mentions IT or telecoms. Read enough of the notice to judge genuine fit.`;
+}
+
+function dossierPrompt(opp, today, hasFirecrawl){
+  const read = hasFirecrawl
+    ? `First, read the actual notice. Use the firecrawl tools to scrape ${opp.url}. If that fails, use web search to find and read the notice or the buyer's procurement page.`
+    : `First, read the actual notice. Use web search to find and read the notice at ${opp.url}, or the buyer's procurement page.`;
+
+  return `You are Flotek Group's tender intelligence analyst. Today is ${today}.
+
+${PROFILE}
+
+Produce a full qualification assessment for this opportunity:
+Title: ${opp.title}
+Buyer: ${opp.buyer}
+Reference: ${opp.ref || "unknown"}
+Notice URL: ${opp.url}
+Deadline: ${opp.deadline || "unknown"}
+Value: ${opp.value || "unknown"}
+
+${read} Base your assessment on what the notice actually says.
+
+${EVIDENCE}
+
+Return ONLY a JSON object, no preamble, no markdown fences:
+{"tags":[string],"headline":string,"term":string|null,"evaluation":string|null,"whyMatch":[{"heading":string,"detail":string}],"qualification":[{"item":string,"status":string,"note":string}],"commercial":{"revenue":string,"recurring":string,"margin":string,"bidEffort":string,"competition":string,"verdict":string},"recommendation":string,"nextAction":string,"watchOut":[string]}
+
+Rules:
+- "tags": exactly 3 short uppercase labels describing the domain, e.g. ["PENETRATION TESTING","PSN","OPEN FRAMEWORK"].
+- "headline": 2-3 sentences describing what the buyer is procuring and where the fit sits.
+- "term": contract length including extensions. Null if not stated.
+- "evaluation": award criteria split if stated, e.g. "50 / 40 / 10 price / quality / social value". Null if not stated.
+- "whyMatch": exactly 3 items. "heading" is 3-5 words. "detail" is one or two sentences mapping a stated requirement to a named Flotek service. No generic statements.
+- "qualification": exactly 3 items — the three things most needing confirmation before bid resource is committed. Draw from mandatory accreditations, ISO, Cyber Essentials / Plus, CHECK / CREST, Microsoft or Cisco partner status, turnover threshold, insurance levels, reference contracts, public sector experience, TUPE, security clearance, 24/7 support, response SLAs, portal registration, framework membership, subcontractor restrictions. "item" is a 3-6 word label, "note" is one or two sentences.
+- "status": CONFIRMED (stated in the notice), LIKELY, INFERRED, or UNKNOWN.
+- "commercial": one or two sentences per field. "verdict" answers whether the value justifies the bid effort.
+- "recommendation": exactly one of BID, QUALIFY IMMEDIATELY, PARTNER, MONITOR, REGISTER, DOWNLOAD PACK, NO BID.
+- "nextAction": one concrete instruction with a timeframe.
+- "watchOut": 0-3 short risk flags — incumbency, mobilisation, lot bundling, unrealistic SLA, geographic reach.`;
+}
+
+function taskPrompt(selected, region){
+  const list = SWEEPS.filter(s => selected.includes(s.id)).map(s => "- " + s.label + ": " + s.terms).join("\n");
+  const geo = region === "wales"
+    ? "Priority order: Wales, then South West England, Midlands, North West England, then UK-wide. Do not exclude worthwhile UK opportunities purely because they sit outside Wales."
+    : "Search UK-wide with no regional weighting.";
+  return `Run this week's Flotek tender intelligence report.
+
+${PROFILE}
+
+Search these areas, using web search across UK public procurement sources:
+${list}
+
+${geo}
+
+${SOURCES}
+
+${EVIDENCE}
+
+Shortlist no more than five opportunities that Flotek has a credible chance of winning. For each, confirm publication date, deadline, value and basis, contract term, evaluation split, lot structure, and whether Flotek can actually apply.
+
+Score each 0-100 (90+ exceptional, 80-89 excellent, 70-79 strong, 60-69 potential, 40-59 partner-dependent) and assign a priority of CRITICAL, HIGH, MEDIUM, QUALIFY / PARTNER or WATCH.
+
+For each opportunity give: what the buyer is procuring; three specific reasons Flotek matches, each mapping a stated requirement to a named Flotek service; the three things most needing confirmation before committing bid resource; a commercial assessment covering likely revenue, recurring potential, bid effort and competitive intensity; and one recommended action from BID, QUALIFY IMMEDIATELY, PARTNER, MONITOR, REGISTER, DOWNLOAD PACK or NO BID, with a concrete next step.
+
+Add a short strategic early-warning section for PINs, market engagement and pipeline items that are not yet biddable.
+
+Present it as a styled HTML artifact in Flotek branding: Russian Violet #32174D, Plum #8E4585, Princeton Orange #F58025, Space Grotesk, orange full stop after headings. Open with a cover summarising how many opportunities made the shortlist and how many need action now, then an at-a-glance page ordered by next decision point, then one page per opportunity.
+
+Where a fact cannot be confirmed from the notice, write "Not confirmed in the public notice — check tender pack." Never invent a reference, URL, deadline or value.`;
+}
+
+/* ---------- API ---------- */
+async function callClaude(prompt, opts){
+  opts = opts || {};
+  const key = store.get(K.key);
+  if (!key) throw new Error("No API key saved.");
+
+  const headers = {
+    "content-type": "application/json",
+    "x-api-key": key,
+    "anthropic-version": "2023-06-01",
+    "anthropic-dangerous-direct-browser-access": "true",
+  };
+
+  const body = {
+    model: MODEL,
+    max_tokens: opts.maxTokens || 2000,
+    messages: [{ role:"user", content: prompt }],
+    tools: [{ type:"web_search_20250305", name:"web_search" }],
+  };
+
+  const fc = store.get(K.fckey);
+  if (opts.firecrawl && fc) {
+    headers["anthropic-beta"] = "mcp-client-2025-04-04";
+    body.mcp_servers = [{
+      type:"url",
+      url:"https://mcp.firecrawl.dev/v2/mcp",
+      name:"firecrawl",
+      authorization_token: fc,
+    }];
+  }
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method:"POST", headers, body: JSON.stringify(body),
+  });
+
+  let data;
+  try { data = await res.json(); }
+  catch { throw new Error("The API returned a response that could not be read (HTTP " + res.status + ")."); }
+
+  if (data.error) throw new Error(data.error.message || ("API error, HTTP " + res.status));
+  if (!res.ok) throw new Error("API error, HTTP " + res.status);
+
+  return (data.content || []).filter(b => b.type === "text").map(b => b.text || "").join("\n").trim();
+}
+
+function parseJson(text){
+  if (!text) throw new Error("The search returned nothing to read.");
+  const t = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+  const a = t.indexOf("{"), b = t.lastIndexOf("}");
+  if (a === -1 || b === -1) throw new Error("The search returned an unreadable response.");
+  return JSON.parse(t.slice(a, b + 1));
+}
+
+/* ---------- Storage ---------- */
+const store = {
+  get(k){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
+  del(k){ try { localStorage.removeItem(k); } catch {} },
+};
+
+/* ---------- Helpers ---------- */
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const norm = s => (s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const today = () => new Date().toISOString().slice(0,10);
+
+function identity(o){
+  const r = norm(o.ref);
+  if (r.length > 4) return "ref:" + r;
+  return "bt:" + norm(o.buyer).slice(0,24) + ":" + norm(o.title).slice(0,40);
+}
+
+function dedupe(list){
+  const map = new Map();
+  const filled = x => Object.values(x).filter(v => v !== null && v !== "" && v !== undefined).length;
+  for (const o of list){
+    const id = identity(o);
+    const ex = map.get(id);
+    if (!ex) map.set(id, Object.assign({}, o, { id }));
+    else if (filled(o) > filled(ex)) map.set(id, Object.assign({}, o, { id }));
+  }
+  return [...map.values()];
+}
+
+function sortOpps(a,b){
+  const pa = PRIORITY_ORDER[a.priority] ?? 9, pb = PRIORITY_ORDER[b.priority] ?? 9;
+  if (pa !== pb) return pa - pb;
+  return (b.score||0) - (a.score||0);
+}
+
+function daysLeft(d){
+  if (!d) return null;
+  const t = new Date(d);
+  if (isNaN(t)) return null;
+  return Math.ceil((t - new Date()) / 86400000);
+}
+
+function money(o){ return o.value ? o.value + (o.valueBasis ? " " + o.valueBasis : "") : null; }
+
+function fieldHTML(label, value){
+  const ok = value != null && value !== "";
+  return '<div><span class="fld-label">' + esc(label) + '</span>'
+    + '<span class="fld-value' + (ok ? "" : " unknown") + '">' + esc(ok ? value : UNKNOWN) + "</span></div>";
+}
+
+function band(score){
+  const s = score || 0;
+  return s >= 90 ? "Exceptional fit" : s >= 80 ? "Excellent fit" : s >= 70 ? "Strong fit" : s >= 60 ? "Potential fit" : "Lower fit";
+}
+
+/* ---------- State ---------- */
+const state = {
+  view: "radar",
+  hasKey: !!store.get(K.key),
+  showSettings: false,
+  selected: ["voice","managedit","network","connectivity"],
+  region: "wales",
+  cadence: "weekly",
+  running: false,
+  progress: {},
+  opps: [],
+  dropped: [],
+  lastRunAt: null,
+  previousRunAt: null,
+  error: null,
+  expanded: null,
+  dossiers: {},
+  dossierLoading: null,
+  reportBuilding: null,
+  copied: false,
+};
+
+(function hydrate(){
+  const sched = store.get(K.sched);
+  if (sched){
+    if (sched.cadence) state.cadence = sched.cadence;
+    if (Array.isArray(sched.sweeps) && sched.sweeps.length) state.selected = sched.sweeps;
+    if (sched.region) state.region = sched.region;
+  }
+  const last = store.get(K.run);
+  if (last){
+    state.opps = (last.opportunities || []).map(o => Object.assign({}, o, { changeStatus:"UNCHANGED" }));
+    state.lastRunAt = last.ranAt;
+    state.previousRunAt = last.ranAt;
+  }
+})();
+
+function saveSchedule(){
+  store.set(K.sched, { cadence: state.cadence, sweeps: state.selected, region: state.region });
+}
+
+function overdueDays(){
+  const c = CADENCES.find(x => x.k === state.cadence);
+  if (!c || !c.days || !state.lastRunAt) return null;
+  const since = Math.floor((Date.now() - new Date(state.lastRunAt)) / 86400000);
+  return since >= c.days ? since : null;
+}
+
+function reportOpps(){
+  return state.opps
+    .filter(o => o.liveness !== "PIPELINE" && o.priority !== "PASS" && o.priority !== "WATCH")
+    .slice()
+    .sort((a,b) => {
+      const da = a.deadline ? new Date(a.deadline).getTime() : Infinity;
+      const db = b.deadline ? new Date(b.deadline).getTime() : Infinity;
+      return da - db;
+    })
+    .slice(0,5);
+}
+
+/* ---------- Actions ---------- */
+async function runSweeps(){
+  if (state.running || !state.selected.length) return;
+  state.running = true; state.error = null; state.expanded = null; state.dropped = [];
+  state.progress = {}; state.selected.forEach(id => state.progress[id] = { state:"queued", count:0 });
+  render();
+
+  const previous = store.get(K.run);
+  state.previousRunAt = previous ? previous.ranAt : null;
+
+  const collected = [];
+  let failures = 0, lastMessage = "";
+
+  for (const id of state.selected){
+    const sweep = SWEEPS.find(s => s.id === id);
+    state.progress[id] = { state:"running", count:0 }; render();
+    try {
+      const parsed = parseJson(await callClaude(sweepPrompt(sweep, state.region, today()), { maxTokens: 2500 }));
+      const found = parsed.opportunities || [];
+      collected.push(...found);
+      state.progress[id] = { state:"done", count: found.length };
+    } catch (e){
+      failures++; lastMessage = e.message;
+      state.progress[id] = { state:"failed", count:0 };
+    }
+    render();
+  }
+
+  const merged = dedupe(collected).sort(sortOpps);
+
+  if (!merged.length){
+    state.error = failures === state.selected.length
+      ? "Every sweep failed. " + lastMessage
+      : "The sweeps completed but found nothing meeting the fit threshold. Try more sweeps, or switch to UK-wide.";
+    state.running = false; render(); return;
+  }
+
+  const prevList = previous ? (previous.opportunities || []) : [];
+  const prevMap = new Map(prevList.map(o => [o.id, o]));
+  const ids = new Set(merged.map(o => o.id));
+
+  state.opps = merged.map(o => {
+    const p = prevMap.get(o.id);
+    if (!p) return Object.assign({}, o, { changeStatus:"NEW" });
+    const changed = p.deadline !== o.deadline || p.value !== o.value || p.priority !== o.priority;
+    return Object.assign({}, o, { changeStatus: changed ? "UPDATED" : "UNCHANGED" });
+  });
+  state.dropped = prevList.filter(o => !ids.has(o.id));
+
+  state.lastRunAt = new Date().toISOString();
+  store.set(K.run, { ranAt: state.lastRunAt, opportunities: merged });
+  state.running = false; render();
+}
+
+async function loadDossier(opp){
+  if (state.dossiers[opp.id]) return;
+  const cached = store.get(K.dossier(opp.id));
+  if (cached && !cached.error){ state.dossiers[opp.id] = cached; render(); return; }
+
+  state.dossierLoading = opp.id; render();
+  try {
+    const parsed = parseJson(await callClaude(dossierPrompt(opp, today(), !!store.get(K.fckey)), { firecrawl:true, maxTokens:3000 }));
+    state.dossiers[opp.id] = parsed;
+    store.set(K.dossier(opp.id), parsed);
+  } catch (e){
+    state.dossiers[opp.id] = { error: e.message };
+  }
+  state.dossierLoading = null; render();
+}
+
+async function buildReport(){
+  const list = reportOpps();
+  const missing = list.filter(o => !state.dossiers[o.id]);
+  for (let i = 0; i < missing.length; i++){
+    state.reportBuilding = { done:i, total:missing.length }; render();
+    await loadDossier(missing[i]);
+  }
+  state.reportBuilding = null;
+  state.view = "report";
+  render();
+  window.scrollTo(0,0);
+}
+
+/* ---------- Render ---------- */
+function render(){
+  document.getElementById("app").innerHTML =
+    state.view === "report" ? reportHTML() : radarHTML();
+}
+
+function mastheadHTML(){
+  return '<div class="masthead"><div class="wrap">'
+    + LOGO
+    + '<h1>Tender radar<span class="dot">.</span></h1>'
+    + '<p>Live UK public-sector opportunities scored against Flotek&rsquo;s delivery capability.</p>'
+    + "</div></div>";
+}
+
+function keyPanelHTML(){
+  const hasFc = !!store.get(K.fckey);
+  return '<div class="panel">'
+    + '<h2 class="sec">Connect your API key<span class="dot">.</span></h2>'
+    + '<p style="font-size:13px;color:var(--muted);margin-top:0">Stored in this browser only. It is never committed to the repository and is sent only to api.anthropic.com. Use a dedicated key with a spend limit set.</p>'
+    + '<label class="fld"><span class="eyebrow">Anthropic API key</span>'
+    + '<input type="password" id="apikey" placeholder="sk-ant-..." autocomplete="off"></label>'
+    + '<label class="fld"><span class="eyebrow">Firecrawl key (optional &mdash; improves notice reading)</span>'
+    + '<input type="password" id="fckey" placeholder="' + (hasFc ? "saved" : "fc-...") + '" autocomplete="off"></label>'
+    + '<div class="row"><button class="btn btn-primary" data-act="savekey">Save and continue</button>'
+    + (state.hasKey ? '<button class="btn btn-ghost" data-act="clearkey">Remove saved keys</button>' : "")
+    + "</div></div>";
+}
+
+function radarHTML(){
+  if (!state.hasKey || state.showSettings)
+    return mastheadHTML() + '<div class="wrap">' + keyPanelHTML() + "</div>";
+
+  const od = overdueDays();
+  let h = mastheadHTML() + '<div class="wrap">';
+
+  if (od !== null && !state.running)
+    h += '<div class="note"><strong>Refresh due.</strong> The last sweep ran ' + od + ' days ago. Run it again to pick up new notices and deadline changes.</div>';
+
+  /* Controls */
+  h += '<div class="panel"><div class="eyebrow" style="margin-bottom:10px">Sweeps to run</div><div class="chips">';
+  for (const s of SWEEPS)
+    h += '<button class="chip" data-act="sweep" data-id="' + s.id + '" aria-pressed="'
+      + (state.selected.includes(s.id) ? "true" : "false") + '"' + (state.running ? " disabled" : "") + ">" + esc(s.label) + "</button>";
+  h += "</div>";
+
+  h += '<div class="row" style="margin-top:14px"><div class="chips">'
+    + '<button class="chip small" data-act="region" data-id="wales" aria-pressed="' + (state.region==="wales") + '">Wales first</button>'
+    + '<button class="chip small" data-act="region" data-id="uk" aria-pressed="' + (state.region==="uk") + '">UK-wide</button>'
+    + "</div>"
+    + '<button class="btn btn-primary" data-act="run"' + (state.running || !state.selected.length ? " disabled" : "") + ">"
+    + (state.running ? '<span class="spin"></span>Searching' : "Run sweeps") + "</button>"
+    + (state.lastRunAt && !state.running ? '<span style="font-size:12px;color:var(--muted-soft)">Last run ' + esc(new Date(state.lastRunAt).toLocaleString("en-GB")) + "</span>" : "")
+    + '<button class="btn btn-ghost" data-act="settings" style="margin-left:auto">Keys</button>'
+    + "</div>";
+
+  if (Object.keys(state.progress).length){
+    h += '<div style="margin-top:14px">';
+    for (const id of state.selected){
+      const s = SWEEPS.find(x => x.id === id);
+      const p = state.progress[id] || { state:"queued", count:0 };
+      const w = p.state === "done" || p.state === "failed" ? 100 : p.state === "running" ? 55 : 6;
+      const label = p.state === "done" ? p.count + " found" : p.state === "running" ? "searching" : p.state === "failed" ? "failed" : "queued";
+      h += '<div class="meter"><div class="name">' + esc(s.label) + '</div>'
+        + '<div class="track"><div class="fill ' + p.state + '" style="width:' + w + '%"></div></div>'
+        + '<div class="stat">' + label + "</div></div>";
+    }
+    h += "</div>";
+  }
+  h += "</div>";
+
+  if (state.error) h += '<div class="note plum">' + esc(state.error) + "</div>";
+
+  const live = state.opps.filter(o => o.liveness !== "PIPELINE");
+  const pipe = state.opps.filter(o => o.liveness === "PIPELINE");
+
+  if (!state.opps.length && !state.running && !state.error)
+    h += '<div class="empty"><div style="font-size:15px;font-weight:600">Nothing scanned yet</div>'
+      + '<p style="font-size:13px;color:var(--muted);max-width:420px;margin:8px auto 0">Pick your sweeps above and run a search. Results are kept in this browser, so the next run tells you what has changed.</p></div>';
+
+  if (state.opps.length){
+    const nw = state.opps.filter(o => o.changeStatus === "NEW").length;
+    h += '<div class="row" style="font-size:12px;color:var(--muted);margin-top:20px">'
+      + "<span><strong>" + live.length + "</strong> live</span>"
+      + (pipe.length ? "<span><strong>" + pipe.length + "</strong> pipeline</span>" : "")
+      + (state.previousRunAt ? "<span>" + nw + " new since " + esc(new Date(state.previousRunAt).toLocaleDateString("en-GB")) + "</span>" : "")
+      + "</div>";
+  }
+
+  if (live.length) h += '<h2 class="sec" style="margin-top:22px">Live opportunities<span class="dot">.</span></h2>' + live.map(cardHTML).join("");
+  if (pipe.length) h += '<h2 class="sec" style="margin-top:22px">Strategic early warning<span class="dot">.</span></h2>' + pipe.map(cardHTML).join("");
+
+  if (state.dropped.length){
+    h += '<h2 class="sec" style="margin-top:22px">No longer showing<span class="dot">.</span></h2>'
+      + '<p style="font-size:12px;color:var(--muted);margin-top:0">Present in the previous run but not this one — closed, withdrawn, or no longer surfacing. Verify before assuming it has gone.</p>';
+    for (const o of state.dropped)
+      h += '<div class="card" style="padding:12px 16px"><div style="font-size:13px;color:var(--muted)">' + esc(o.title) + "</div>"
+        + '<div style="font-size:12px;color:var(--muted-soft)">' + esc(o.buyer) + (o.deadline ? " &middot; closed " + esc(o.deadline) : "") + "</div></div>";
+  }
+
+  /* Report + reminder */
+  const rl = reportOpps();
+  h += '<div class="panel"><h2 class="sec">Weekly report<span class="dot">.</span></h2>'
+    + '<p style="font-size:13px;color:var(--muted);margin-top:0">Builds the branded shortlist from this run — cover, at-a-glance page ordered by next decision point, then a page per opportunity. It writes the full assessment for any of the top five that don&rsquo;t have one yet, so allow a few minutes.</p>'
+    + '<div class="row"><button class="btn btn-violet" data-act="report"' + (!rl.length || state.reportBuilding ? " disabled" : "") + ">"
+    + (state.reportBuilding ? '<span class="spin"></span>Writing assessments ' + (state.reportBuilding.done+1) + "/" + state.reportBuilding.total : "Build weekly report")
+    + "</button>"
+    + '<span style="font-size:12px;color:var(--muted-soft)">' + (rl.length ? rl.length + " opportunit" + (rl.length===1?"y":"ies") + " will be included" : "Run a sweep first") + "</span></div>";
+
+  h += '<div style="border-top:1px solid var(--rule-soft);margin-top:16px;padding-top:16px">'
+    + '<div class="eyebrow" style="margin-bottom:8px">Remind me to run this</div><div class="chips">';
+  for (const c of CADENCES)
+    h += '<button class="chip small" data-act="cadence" data-id="' + c.k + '" aria-pressed="' + (state.cadence===c.k) + '">' + c.l + "</button>";
+  h += "</div>"
+    + '<p style="font-size:12px;color:var(--muted);margin-top:10px">This page only runs while it is open, so the reminder appears when you return. For a report that arrives without you, paste the prompt below into a scheduled task in Claude.</p>'
+    + '<button class="btn btn-outline" data-act="copytask">' + (state.copied ? "Copied" : "Copy scheduled-task prompt") + "</button>"
+    + "</div></div>";
+
+  h += '<p style="font-size:11px;color:var(--muted-soft);padding:20px 0 40px">Confidential — prepared for Flotek. Always verify deadlines and values against the original notice before committing bid resource.</p>';
+  return h + "</div>";
+}
+
+function cardHTML(o){
+  const dl = daysLeft(o.deadline);
+  const s = Math.max(0, Math.min(100, o.score || 0));
+  const colour = s >= 80 ? "var(--orange)" : s >= 70 ? "var(--plum)" : s >= 60 ? "var(--violet)" : "var(--rule)";
+  const open = state.expanded === o.id;
+
+  let h = '<div class="card"><div class="card-body">'
+    + '<div class="spine"><i style="height:' + s + '%;background:' + colour + '"></i></div>'
+    + '<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:12px">';
+
+  h += '<div class="row" style="gap:8px">'
+    + '<span class="tag ' + (PRIORITY_CLASS[o.priority] || "t-medium") + '">' + esc(o.priority) + "</span>"
+    + (o.changeStatus ? '<span class="tag ' + (CHANGE_CLASS[o.changeStatus] || "t-unchanged") + '">' + esc(o.changeStatus) + "</span>" : "")
+    + '<span style="font-size:12px;font-weight:700;color:var(--violet)">' + s + '<span style="color:var(--muted-soft);font-weight:500">/100</span></span>'
+    + (dl !== null && dl >= 0 ? '<span style="font-size:12px;color:' + (dl <= 7 ? "var(--orange)" : "var(--muted-soft)") + '">'
+        + (dl === 0 ? "closes today" : dl + " day" + (dl === 1 ? "" : "s") + " left") + "</span>" : "")
+    + "</div>";
+
+  h += '<div><div class="title">' + esc(o.title) + '</div><div class="buyer">' + esc(o.buyer) + "</div></div>"
+    + '<div class="summary">' + esc(o.summary) + "</div>"
+    + '<div class="grid2">' + fieldHTML("Deadline", o.deadline) + fieldHTML("Value", money(o))
+    + fieldHTML("Vehicle", o.vehicle) + fieldHTML("Location", o.location) + "</div>";
+
+  h += '<div class="linkrow">'
+    + (o.url ? '<a href="' + esc(o.url) + '" target="_blank" rel="noopener noreferrer" style="font-weight:600">' + esc(o.source || "Open notice") + "</a>" : "")
+    + "<span>Ref " + esc(o.ref || "not stated") + " &middot; confidence " + esc(o.confidence || "UNKNOWN") + "</span></div>";
+
+  h += '<button class="disclose" data-act="expand" data-id="' + esc(o.id) + '">' + (open ? "Hide assessment" : "Qualify this") + "</button>"
+    + "</div></div>";
+
+  if (open){
+    const d = state.dossiers[o.id];
+    h += '<div class="dossier">';
+    if (state.dossierLoading === o.id) h += '<div style="font-size:13px;color:var(--muted)">Reading the notice and building the assessment&hellip;</div>';
+    else if (d && d.error) h += '<div style="font-size:13px;color:var(--plum)">Could not read the notice: ' + esc(d.error) + " Open it directly and try again.</div>";
+    else if (d) h += dossierHTML(d);
+    h += "</div>";
+  }
+  return h + "</div>";
+}
+
+function dossierHTML(d){
+  let h = "";
+  if (d.whyMatch && d.whyMatch.length){
+    h += '<div class="eyebrow">Why Flotek matches</div><div style="margin:8px 0 16px">';
+    for (const w of d.whyMatch)
+      h += '<div style="font-size:13px;margin-bottom:6px"><strong>' + esc(w.heading || w) + "</strong>"
+        + (w.detail ? '<span style="color:var(--muted)"> — ' + esc(w.detail) + "</span>" : "") + "</div>";
+    h += "</div>";
+  }
+  if (d.qualification && d.qualification.length){
+    h += '<div class="eyebrow">Qualification checks</div><div style="margin:8px 0 16px">';
+    for (const q of d.qualification)
+      h += '<div class="qual"><span class="st ' + (STATUS_CLASS[q.status] || "s-unknown") + '">' + esc(q.status) + "</span>"
+        + "<div><strong>" + esc(q.item) + '</strong><span style="color:var(--muted)"> — ' + esc(q.note) + "</span></div></div>";
+    h += "</div>";
+  }
+  if (d.commercial){
+    h += '<div class="eyebrow">Commercial assessment</div><div class="grid2" style="margin:8px 0 16px">'
+      + fieldHTML("Likely revenue", d.commercial.revenue) + fieldHTML("Recurring potential", d.commercial.recurring)
+      + fieldHTML("Margin", d.commercial.margin) + fieldHTML("Bid effort", d.commercial.bidEffort)
+      + fieldHTML("Competition", d.commercial.competition) + fieldHTML("Verdict", d.commercial.verdict) + "</div>";
+  }
+  if (d.watchOut && d.watchOut.length){
+    h += '<div class="eyebrow">Watch out for</div><ul style="margin:8px 0 16px;padding-left:18px;font-size:13px;color:var(--muted)">'
+      + d.watchOut.map(w => "<li>" + esc(w) + "</li>").join("") + "</ul>";
+  }
+  if (d.recommendation){
+    h += '<div class="rec"><div class="eyebrow" style="color:var(--plum-lighter)">Recommendation</div>'
+      + '<div class="big">' + esc(d.recommendation) + '<span class="dot">.</span></div>'
+      + (d.nextAction ? "<p>" + esc(d.nextAction) + "</p>" : "") + "</div>";
+  }
+  return h;
+}
+
+function reportHTML(){
+  const list = reportOpps();
+  const dateLabel = new Date().toLocaleDateString("en-GB", { day:"numeric", month:"long", year:"numeric" });
+  const actionNow = list.filter(o => o.priority === "CRITICAL").length;
+  const strong = list.filter(o => (o.score||0) >= 80).length;
+
+  let h = '<div class="rpt">'
+    + '<div class="toolbar noprint">'
+    + '<button class="btn btn-ghost" data-act="back">Back to radar</button>'
+    + '<button class="btn btn-primary" data-act="print">Print or save as PDF</button>'
+    + "</div>";
+
+  /* Cover */
+  h += '<div class="rpt-page rpt-cover">'
+    + LOGO
+    + '<div class="eyebrow" style="color:var(--orange);margin-top:22px">Tender intelligence</div>'
+    + '<div class="eyebrow" style="color:var(--plum-lighter);margin-top:4px">Weekly opportunity report</div>'
+    + "<h2>" + list.length + " opportunit" + (list.length === 1 ? "y" : "ies") + "<br>worth a closer look<span class=\"dot\">.</span></h2>"
+    + "<p>A focused shortlist of public sector opportunities aligned to Flotek&rsquo;s delivery capability, ordered by next decision point.</p>"
+    + '<div class="grid3" style="margin-top:36px">'
+    + '<div class="stat"><b>' + list.length + "</b><span>shortlisted this week</span></div>"
+    + '<div class="stat"><b>' + strong + "</b><span>scoring 80 or above</span></div>"
+    + '<div class="stat"><b>' + actionNow + "</b><span>needing action now</span></div></div>"
+    + '<div class="grid3" style="margin-top:40px;font-size:12px">'
+    + '<div class="meta"><b>Prepared for</b>Flotek Group</div>'
+    + '<div class="meta"><b>Reporting date</b>' + esc(dateLabel) + "</div>"
+    + '<div class="meta"><b>Prepared by</b>Tender Intelligence</div></div>'
+    + '<div style="font-size:10px;color:var(--violet-light);margin-top:40px">Confidential &mdash; prepared for Flotek</div></div>';
+
+  /* At a glance */
+  h += '<div class="rpt-page"><div class="eyebrow" style="color:var(--plum)">At a glance</div>'
+    + '<h3 style="font-size:26px;font-weight:700;letter-spacing:-.02em;color:var(--violet);margin:8px 0 22px">This week&rsquo;s priority opportunities<span class="dot">.</span></h3>';
+  list.forEach((o, i) => {
+    const d = state.dossiers[o.id] || {};
+    h += '<div class="glance"><div class="num">' + (i+1) + '</div><div style="flex:1;min-width:0">'
+      + '<div class="row" style="gap:8px"><span style="font-size:15px;font-weight:600">' + esc(o.title) + "</span>"
+      + '<span class="tag ' + (PRIORITY_CLASS[o.priority] || "t-medium") + '">' + esc(o.priority) + "</span></div>"
+      + '<div class="buyer">' + esc(o.buyer) + "</div>"
+      + '<div class="row" style="gap:20px;margin-top:8px;font-size:12px;color:var(--muted)">'
+      + "<span>" + esc(money(o) || "Value not stated") + "</span><span>" + esc(o.deadline || "Deadline not stated") + "</span></div>"
+      + (d.recommendation ? '<div style="font-size:12px;margin-top:8px"><strong>' + esc(d.recommendation) + "</strong>" + (d.nextAction ? " &mdash; " + esc(d.nextAction) : "") + "</div>" : "")
+      + "</div></div>";
+  });
+  h += '<p style="font-size:10px;color:var(--muted-soft);margin-top:20px">Values are as published and their VAT bases differ. Check the tender documents before relying on any aggregate.</p></div>';
+
+  /* Pages */
+  list.forEach((o, i) => { h += reportPageHTML(o, state.dossiers[o.id] || {}, i+1, dateLabel); });
+
+  return h + "</div>";
+}
+
+function reportPageHTML(o, d, index, dateLabel){
+  let h = '<div class="rpt-page">'
+    + '<div class="eyebrow" style="color:var(--plum)">Opportunity ' + String(index).padStart(2,"0")
+    + (d.tags && d.tags.length ? " &middot; " + esc(d.tags.join(" | ")) : "") + "</div>";
+
+  h += '<div class="row" style="align-items:flex-start;margin-top:10px"><div style="flex:1;min-width:0">'
+    + '<h3 style="font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--violet);margin:0">' + esc(o.title) + '<span class="dot">.</span></h3>'
+    + '<div style="font-size:14px;color:var(--plum);margin-top:4px">' + esc(o.buyer) + "</div></div>"
+    + '<div style="text-align:right"><div style="font-size:30px;font-weight:700;color:var(--violet)">' + (o.score||0)
+    + '<span style="font-size:15px;color:var(--muted-soft)">/100</span></div>'
+    + '<div class="eyebrow" style="color:var(--orange)">' + band(o.score) + "</div></div></div>";
+
+  h += '<p style="font-size:13.5px;line-height:1.6;margin-top:16px;max-width:620px">' + esc(d.headline || o.summary) + "</p>";
+
+  h += '<div class="grid4" style="margin-top:18px">'
+    + fieldHTML("Estimated value", money(o)) + fieldHTML("Deadline", o.deadline)
+    + fieldHTML("Term", d.term || o.duration) + fieldHTML("Evaluation", d.evaluation) + "</div>";
+
+  const why = d.whyMatch || [], qual = d.qualification || [];
+  if (why.length || qual.length){
+    h += '<div class="grid2" style="gap:32px;margin-top:24px"><div>';
+    if (why.length){
+      h += '<div class="eyebrow" style="margin-bottom:10px">Why Flotek is a strong match</div>';
+      for (const w of why)
+        h += '<div style="font-size:12.5px;line-height:1.55;margin-bottom:10px"><div style="font-weight:600">' + esc(w.heading || w) + "</div>"
+          + (w.detail ? '<div style="color:var(--muted)">' + esc(w.detail) + "</div>" : "") + "</div>";
+    }
+    h += "</div><div>";
+    if (qual.length){
+      h += '<div class="eyebrow" style="margin-bottom:10px">Qualify before committing</div>';
+      for (const q of qual)
+        h += '<div style="font-size:12.5px;line-height:1.55;margin-bottom:10px"><div style="font-weight:600">' + esc(q.item) + "</div>"
+          + '<div style="color:var(--muted)">' + esc(q.note) + "</div></div>";
+    }
+    h += "</div></div>";
+  }
+
+  if (d.recommendation)
+    h += '<div class="row" style="background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:16px;margin-top:24px;align-items:flex-start">'
+      + '<div style="flex:0 0 210px"><div class="eyebrow">Recommended action</div>'
+      + '<div style="font-size:16px;font-weight:700;color:var(--violet)">' + esc(d.recommendation) + '<span class="dot">.</span></div></div>'
+      + '<div style="flex:1;min-width:220px;font-size:12.5px;line-height:1.6">' + esc(d.nextAction || "") + "</div></div>";
+
+  h += '<div class="footline"><span>Source: ' + esc(o.source || "procurement notice") + " &middot; reference " + esc(o.ref || "not stated")
+    + " &middot; confidence " + esc(o.confidence || "UNKNOWN") + "</span>"
+    + "<span>Tender Intelligence | Flotek | " + esc(dateLabel) + "</span></div>";
+
+  if (o.url) h += '<a href="' + esc(o.url) + '" target="_blank" rel="noopener noreferrer" style="font-size:11px;font-weight:600">View notice</a>';
+  return h + "</div>";
+}
+
+/* ---------- Events ---------- */
+document.getElementById("app").addEventListener("click", async ev => {
+  const btn = ev.target.closest("[data-act]");
+  if (!btn) return;
+  const act = btn.dataset.act, id = btn.dataset.id;
+
+  if (act === "savekey"){
+    const k = document.getElementById("apikey").value.trim();
+    const f = document.getElementById("fckey").value.trim();
+    if (k) { store.set(K.key, k); state.hasKey = true; }
+    if (f) store.set(K.fckey, f);
+    state.showSettings = false; render(); return;
+  }
+  if (act === "clearkey"){ store.del(K.key); store.del(K.fckey); state.hasKey = false; render(); return; }
+  if (act === "settings"){ state.showSettings = true; render(); return; }
+  if (act === "sweep"){
+    state.selected = state.selected.includes(id) ? state.selected.filter(x => x !== id) : [...state.selected, id];
+    saveSchedule(); render(); return;
+  }
+  if (act === "region"){ state.region = id; saveSchedule(); render(); return; }
+  if (act === "cadence"){ state.cadence = id; saveSchedule(); render(); return; }
+  if (act === "run"){ await runSweeps(); return; }
+  if (act === "expand"){
+    const opp = state.opps.find(o => o.id === id);
+    if (state.expanded === id){ state.expanded = null; render(); return; }
+    state.expanded = id; render();
+    await loadDossier(opp); return;
+  }
+  if (act === "report"){ await buildReport(); return; }
+  if (act === "back"){ state.view = "radar"; render(); window.scrollTo(0,0); return; }
+  if (act === "print"){ window.print(); return; }
+  if (act === "copytask"){
+    try { await navigator.clipboard.writeText(taskPrompt(state.selected, state.region)); state.copied = true; render(); setTimeout(() => { state.copied = false; render(); }, 2500); }
+    catch { alert("Copy failed. Your browser blocked clipboard access — try again after clicking the page."); }
+    return;
+  }
+});
+
+render();
+</script>
+</body>
+</html>
