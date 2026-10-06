@@ -27,6 +27,13 @@ function nodeGet(url: string, headers: Record<string, string>, timeoutMs: number
   });
 }
 
+/** One-line summary of an error body. ASP.NET error pages put the exception in <title>; stripping tags alone leaves only CSS. */
+function errorSummary(body: string): string {
+  const title = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(body)?.[1];
+  const text = title || body.replace(/<(style|script)[\s\S]*?<\/\1>/gi, " ").replace(/<[^>]+>/g, " ");
+  return text.replace(/\s+/g, " ").trim().slice(0, 160);
+}
+
 export interface SourceRunInput {
   settings: Settings;
   params: SearchParams;
@@ -68,7 +75,7 @@ export async function fetchJson(url: string, timeoutMs = 25000, extraHosts: stri
       await new Promise((res) => setTimeout(res, Math.min(20, Number(r.retryAfter) || 5) * 1000));
       return fetchJson(url, timeoutMs, extraHosts, attempt + 1);
     }
-    if (r.status < 200 || r.status >= 300) throw new Error(`HTTP ${r.status} from ${host}: ${r.body.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160)}`);
+    if (r.status < 200 || r.status >= 300) throw new Error(`HTTP ${r.status} from ${host}: ${errorSummary(r.body)}`);
     try {
       return JSON.parse(r.body);
     } catch {

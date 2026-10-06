@@ -52,6 +52,14 @@ function buildUrl(endpoint: string, id: string, month: string, type: number, var
   return u.toString();
 }
 
+/**
+ * A 500 carrying a SQL exception (e.g. "Error converting data type nvarchar to
+ * float") is a fault in the portal's own database query. It happens whichever
+ * output format or locale is requested, so retrying other variants or hosts
+ * only multiplies the wait.
+ */
+const DATA_FAULT_RE = /HTTP 500 from [^:]+: .*(error converting data type|sqlexception|conversion failed)/i;
+
 async function fetchWithFallback(id: string, month: string, type: number, hosts: string[]): Promise<any> {
   const list = PROACTIS_ENDPOINTS[id];
   const preferred = workingEndpoint.get(id);
@@ -69,6 +77,7 @@ async function fetchWithFallback(id: string, month: string, type: number, hosts:
       } catch (e) {
         lastErr = e;
         const msg = e instanceof Error ? e.message : String(e);
+        if (DATA_FAULT_RE.test(msg)) throw e;
         // connection-level problems: move to the next host; server errors: try the next parameter style
         if (/Could not connect/.test(msg)) break;
       }
@@ -90,26 +99,33 @@ function monthsBack(lookbackDays: number): string[] {
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-function releasesFrom(json: any): any[] {
+/** Releases from a response, or null when the response is not a shape we recognise. An empty month is [] not null. */
+function releasesFrom(json: any): any[] | null {
   const std = collectReleases(json);
   if (std.length) return std;
+  if (json && ["releases", "results", "records"].some((k) => Array.isArray(json[k]))) return [];
   if (Array.isArray(json)) return json.flatMap((x) => (x?.releases ? x.releases : x?.tender ? [x] : []));
   for (const k of ["notices", "Notices", "data", "items"]) if (Array.isArray(json?.[k])) return json[k].flatMap((x: any) => (x?.releases ? x.releases : x?.tender ? [x] : []));
-  return [];
+  return json == null || (typeof json === "object" && !Object.keys(json).length) ? [] : null;
+}
+
+/** Cursor is "next:ok:failed" so the verdict covers the whole search, not just the last batch. */
+function parseCursor(cursor: string | null, max: number): { start: number; ok: number; failed: number } {
+  if (!cursor) return { start: 0, ok: 0, failed: 0 };
+  const [start, ok = 0, failed = 0] = cursor.split(":").map((x) => parseInt(x, 10));
+  if (![start, ok, failed].every((n) => Number.isFinite(n) && n >= 0) || start > max) throw new Error("Invalid continuation cursor");
+  return { start, ok, failed };
 }
 
 export async function runProactisApi(def: SourceDefinition, input: SourceRunInput): Promise<SourceRunResult> {
   if (!PROACTIS_ENDPOINTS[def.id]) throw new Error(`No API endpoint for ${def.id}`);
   const months = monthsBack(input.params.lookbackDays);
   const jobs = months.flatMap((m) => NOTICE_TYPES.map((t) => ({ month: m, ...t })));
-  let start = 0;
-  if (input.cursor) {
-    start = parseInt(input.cursor, 10);
-    if (!Number.isFinite(start) || start < 0 || start > jobs.length) throw new Error("Invalid continuation cursor");
-  }
+  const { start, ok: okBefore, failed: failedBefore } = parseCursor(input.cursor, jobs.length);
   const end = Math.min(jobs.length, start + REQUESTS_PER_CALL);
   const since = Date.now() - input.params.lookbackDays * 86400000;
   let checked = 0;
+  let ok = okBefore;
   const candidates: RawNotice[] = [];
   const failures: string[] = [];
 
@@ -123,10 +139,12 @@ export async function runProactisApi(def: SourceDefinition, input: SourceRunInpu
       continue;
     }
     const releases = releasesFrom(json);
-    if (!releases.length && json && (Array.isArray(json) ? json.length : Object.keys(json).length)) {
+    if (!releases) {
       const shape = Array.isArray(json) ? `array of ${json.length}, first keys: ${Object.keys(json[0] || {}).slice(0, 6).join(", ")}` : `keys: ${Object.keys(json).slice(0, 8).join(", ")}`;
       failures.push(`${job.label} ${job.month}: response not recognised as OCDS (${shape})`);
+      continue;
     }
+    ok++;
     for (const r of releases) {
       checked++;
       const n = normaliseRelease(r, def.id, def.label, () => null, job.stage);
@@ -136,16 +154,30 @@ export async function runProactisApi(def: SourceDefinition, input: SourceRunInpu
     }
   }
 
+  const failed = failedBefore + failures.length;
   const done = end >= jobs.length;
-  if (failures.length === end - start) {
-    return { status: "ERROR", message: failures[0], checked, candidates, nextCursor: null, pages: end - start };
+  const pages = end - start;
+  if (!done) {
+    // keep going even if this batch failed: a fault in one month must not hide the others
+    return { status: "CONNECTED", message: `Fetched ${end} of ${jobs.length} month/type batches…`, checked, candidates, nextCursor: `${end}:${ok}:${failed}`, pages };
+  }
+  const sample = failures[0] ? ` Last error: ${failures[failures.length - 1]}` : "";
+  if (ok === 0) {
+    return {
+      status: "ERROR",
+      message: `${def.label} API failed on all ${jobs.length} month/notice-type requests, so no notices were retrieved. This is a fault on the portal's side, not a connection problem.${sample}`,
+      checked,
+      candidates,
+      nextCursor: null,
+      pages,
+    };
   }
   return {
     status: "CONNECTED",
-    message: done ? (failures.length ? `Search complete (${failures.length} request(s) failed: ${failures[0]})` : "Search complete") : `Fetched ${end} of ${jobs.length} month/type batches…`,
+    message: failed ? `Partial: ${failed} of ${jobs.length} month/notice-type requests failed and those notices were not retrieved.${sample}` : "Search complete",
     checked,
     candidates,
-    nextCursor: done ? null : String(end),
-    pages: end - start,
+    nextCursor: null,
+    pages,
   };
 }

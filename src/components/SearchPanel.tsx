@@ -69,7 +69,8 @@ export default function SearchPanel({ defaultRegions, defaultLookback, onComplet
           setStep(s.id, { detail: `${checked.toLocaleString()} notices checked, ${relevant} relevant${cursor ? " — fetching more…" : ""}` });
           guard++;
         } while (cursor && guard < 40);
-        if (status === "CONNECTED") setStep(s.id, { state: "done", label: `${s.label}`, detail: `${checked.toLocaleString()} notices checked, ${relevant} relevant` });
+        if (status === "CONNECTED" && message.startsWith("Partial")) setStep(s.id, { state: "error", label: `${s.label} — partial`, detail: `${checked.toLocaleString()} notices checked, ${relevant} relevant. ${message}` });
+        else if (status === "CONNECTED") setStep(s.id, { state: "done", label: `${s.label}`, detail: `${checked.toLocaleString()} notices checked, ${relevant} relevant` });
         else if (status === "NOT CONNECTED") setStep(s.id, { state: "skipped", label: `${s.label} — not connected`, detail: message });
         else setStep(s.id, { state: "error", label: `${s.label} — error`, detail: message });
       }
