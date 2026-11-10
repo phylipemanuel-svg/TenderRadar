@@ -1,5 +1,7 @@
 # Flotek Tender Radar
 
+> **Looking for the Next.js app?** The deployed Tender Radar app (flotek-tender-radar.vercel.app) lives in the private repository `phylipemanuel-svg/Flotek-tender-radar`. This repository holds only the original single-file `index.html` tool.
+
 A single-file tool that searches UK public-sector procurement sources for opportunities matching Flotek's delivery capability, scores them, and produces a branded weekly shortlist.
 
 No build step, no dependencies, no server. One HTML file.
