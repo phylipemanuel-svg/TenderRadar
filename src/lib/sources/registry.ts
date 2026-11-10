@@ -29,7 +29,7 @@ export const SOURCES: SourceDefinition[] = [
     label: "Sell2Wales",
     kind: "api",
     website: "https://www.sell2wales.gov.wales/",
-    description: "Welsh public sector portal. Official OCDS API (api.sell2wales.gov.wales) searched automatically by month and notice type.",
+    description: "Welsh public sector portal. Official OCDS API (api.sell2wales.gov.wales) searched automatically by month and notice type; if the API is failing, the public website search is read instead.",
     allowedHosts: ["sell2wales.gov.wales", "api-sell2wales.klickstream.com"],
   },
   {

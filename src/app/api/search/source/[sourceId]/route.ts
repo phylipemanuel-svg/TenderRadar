@@ -5,6 +5,7 @@ import { runFindATender } from "@/lib/sources/fts";
 import { runContractsFinder } from "@/lib/sources/contractsfinder";
 import { runFeedSource } from "@/lib/sources/feed";
 import { runProactisApi } from "@/lib/sources/proactis";
+import { runSell2Wales } from "@/lib/sources/sell2walesweb";
 import { recordSourceProgress } from "@/lib/pipeline";
 import { json, errorResponse, readJson } from "../../../_util";
 import type { SearchParams } from "@/lib/types";
@@ -30,7 +31,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ sourceId: stri
     try {
       if (def.id === "fts") result = await runFindATender(input);
       else if (def.id === "contractsfinder") result = await runContractsFinder(input);
-      else if (def.id === "sell2wales" || def.id === "pcs") result = await runProactisApi(def, input);
+      else if (def.id === "sell2wales") result = await runSell2Wales(def, input);
+      else if (def.id === "pcs") result = await runProactisApi(def, input);
       else result = await runFeedSource(def, settings.feedUrls[def.id] || "", input);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

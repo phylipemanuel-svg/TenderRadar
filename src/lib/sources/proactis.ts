@@ -109,6 +109,13 @@ function releasesFrom(json: any): any[] | null {
   return json == null || (typeof json === "object" && !Object.keys(json).length) ? [] : null;
 }
 
+/** One request for this month's contract notices: throws if the notice list is not answering. */
+export async function probeProactisApi(def: SourceDefinition): Promise<void> {
+  if (!PROACTIS_ENDPOINTS[def.id]) throw new Error(`No API endpoint for ${def.id}`);
+  const json = await fetchWithFallback(def.id, monthsBack(0)[0], 2, def.allowedHosts);
+  if (!releasesFrom(json)) throw new Error("API response not recognised as OCDS");
+}
+
 /** Cursor is "next:ok:failed" so the verdict covers the whole search, not just the last batch. */
 function parseCursor(cursor: string | null, max: number): { start: number; ok: number; failed: number } {
   if (!cursor) return { start: 0, ok: 0, failed: 0 };
